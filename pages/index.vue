@@ -41,9 +41,19 @@
           <div class="flex items-center gap-1 text-sm opacity-70">
             <span>by {{ flashcard.author?.name ?? "알 수 없는 사용자" }}</span>
             &middot;
-            <span>북마크 {{ flashcard.bookmarkCount ?? 0 }}개</span>
+            <div class="flex items-center gap-1">
+              <UIcon 
+                :name="flashcard.isBookmarked ? 'i-heroicons-bookmark-solid' : 'i-heroicons-bookmark'" 
+                class="w-3 h-3" 
+                :class="flashcard.isBookmarked ? 'text-primary' : ''"
+              />
+              <span>{{ flashcard.bookmarkCount ?? 0 }}</span>
+            </div>
             &middot;
-            <span>{{ flashcard.cardCount ?? 0 }}장</span>
+            <div class="flex items-center gap-1">
+              <UIcon name="i-heroicons-rectangle-stack" class="w-3 h-3" />
+              <span>{{ flashcard.cardCount ?? 0 }}</span>
+            </div>
           </div>
         </div>
       </NuxtLink>

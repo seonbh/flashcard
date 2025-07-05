@@ -1,5 +1,5 @@
 import Bookmark from "~/server/models/bookmark";
-import Flashcard from "~/server/models/flashcard";
+import Flashcard, { type IFlashcard } from "~/server/models/flashcard";
 import User from "~/server/models/user";
 import mongoose from "mongoose";
 
@@ -56,12 +56,9 @@ export default defineEventHandler(async (event) => {
   }
 
   const session = await mongoose.startSession();
-
+  let isBookmarked = false;
+  let updatedFlashcard: IFlashcard | null;
   try {
-    let isBookmarked;
-    let message;
-    let updatedFlashcard;
-
     await session.withTransaction(async () => {
       const bookmarked = await Bookmark.bookmarked(user.id, id);
 
@@ -74,7 +71,6 @@ export default defineEventHandler(async (event) => {
           { new: true }
         );
         isBookmarked = false;
-        message = "북마크가 해제되었습니다.";
       } else {
         // 북마크 추가
         await Bookmark.add(user.id, id);
@@ -84,17 +80,14 @@ export default defineEventHandler(async (event) => {
           { new: true }
         );
         isBookmarked = true;
-        message = "북마크가 추가되었습니다.";
       }
     });
 
-    return {
-      success: true,
-      message,
-      isBookmarked,
-      bookmarkCount: updatedFlashcard?.bookmarkCount ?? 0,
-    };
+    if (!updatedFlashcard!) {
+      throw new Error();
+    }
   } catch {
+    session.abortTransaction();
     throw createError({
       statusCode: 500,
       message: "북마크 처리 중 오류가 발생했습니다.",
@@ -102,4 +95,10 @@ export default defineEventHandler(async (event) => {
   } finally {
     await session.endSession();
   }
+  return {
+    success: true,
+    isBookmarked,
+    bookmarkCount:
+      (updatedFlashcard as unknown as IFlashcard)?.bookmarkCount ?? 0,
+  };
 });

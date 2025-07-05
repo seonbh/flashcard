@@ -49,7 +49,7 @@
                   : 'i-heroicons-bookmark'
               "
               :loading="pending"
-              :disabled="pending"
+              :disabled="pending || waitingForBookmark"
               @click="toggleBookmark"
             >
               {{ flashcard?.bookmarkCount ?? 0 }}
@@ -65,7 +65,7 @@
       <!-- 플래시카드 -->
       <div
         v-if="flashcard"
-        class="flex-1 w-full flex flex-col items-center justify-center px-0 sm:px-4 mb-8"
+        class="flex-1 w-full flex flex-col items-center justify-center px-0 sm:px-4"
       >
         <div
           class="w-full max-w-2xl aspect-[3/2] bg-white dark:bg-black rounded-xl p-8 flex items-center justify-center cursor-pointer border-1 border-gray-300/70 dark:border-gray-600/70"
@@ -205,8 +205,11 @@ async function deleteFlashcard() {
   }
 }
 
+const waitingForBookmark = ref(false);
+
 async function toggleBookmark() {
-  if (!user.value) return;
+  if (waitingForBookmark.value) return; // 중복 클릭 방지
+  waitingForBookmark.value = true;
 
   try {
     const result = await $fetch(`/api/flashcards/${flashcardId}/bookmark`, {
@@ -233,6 +236,8 @@ async function toggleBookmark() {
       color: "error",
       duration: 3000,
     });
+  } finally {
+    waitingForBookmark.value = false;
   }
 }
 </script>
