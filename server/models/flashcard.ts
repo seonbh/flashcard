@@ -1,6 +1,6 @@
 import mongoose, { Types } from "mongoose";
 import type { Document, Model } from "mongoose";
-// import User from "~/server/models/user";
+import User from "~/server/models/user";
 import type { IUser } from "~/server/models/user";
 import type { IBookmark } from "~/server/models/bookmark";
 
@@ -61,7 +61,7 @@ const FlashcardSchema = new mongoose.Schema<IFlashcard, IFlashcardModel>(
     },
     author: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User",
+      ref: User,
       default: null,
       index: true,
     },
@@ -176,8 +176,8 @@ FlashcardSchema.statics.searchByTitleWithAuthor = async function (
     $or: [
       { title: { $regex: query, $options: "i" } },
       { "cards.front": { $regex: query, $options: "i" } },
-      { "cards.back": { $regex: query, $options: "i" } }
-    ]
+      { "cards.back": { $regex: query, $options: "i" } },
+    ],
   })
     .populate("author")
     .sort({ bookmarkCount: -1, createdAt: -1 });
@@ -254,7 +254,6 @@ FlashcardSchema.virtual("bookmarks", {
   localField: "_id",
   foreignField: "flashcard",
 });
-
 
 // 6. 모델 생성 및 내보내기
 const FlashcardModel =
