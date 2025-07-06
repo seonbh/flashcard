@@ -67,36 +67,59 @@
         v-if="flashcard"
         class="flex-1 w-full flex flex-col items-center justify-center px-4"
       >
-        <div
-          class="w-full max-w-2xl aspect-[3/2] bg-white dark:bg-black rounded-xl p-8 flex items-center justify-center cursor-pointer border-1 border-gray-300/70 dark:border-gray-600/70"
-          @click="flipCard"
-        >
-          <div class="text-center select-none">
-            <div v-if="showFront" class="text-2xl font-bold">
-              {{ currentCard?.front ?? "" }}
+        <div class="w-full max-w-2xl relative">
+          <div
+            class="w-full aspect-[3/2] bg-white dark:bg-black rounded-xl p-8 flex items-center justify-center cursor-pointer border-1 border-gray-300/70 dark:border-gray-600/70"
+            @click="flipCard"
+          >
+            <div class="text-center select-none">
+              <div v-if="showFront" class="text-2xl font-bold">
+                {{ currentCard?.front ?? "" }}
+              </div>
+              <div v-else class="text-xl">{{ currentCard?.back ?? "" }}</div>
             </div>
-            <div v-else class="text-xl">{{ currentCard?.back ?? "" }}</div>
+          </div>
+
+          <!-- 진행도 -->
+          <div
+            class="absolute top-4 left-1/2 transform -translate-x-1/2 text-sm opacity-70 pointer-events-none"
+          >
+            {{ currentCardIndex + 1 }} / {{ shuffledCards.length }}
+          </div>
+
+          <!-- 왼쪽 화살표 -->
+          <div class="absolute left-0 top-0 bottom-0 flex items-center">
+            <button
+              :disabled="currentCardIndex === 0"
+              class="h-full px-5 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+              @click="prevCard"
+            >
+              <UIcon name="i-material-symbols-chevron-left" size="30" />
+            </button>
+          </div>
+
+          <!-- 오른쪽 화살표 -->
+          <div class="absolute right-0 top-0 bottom-0 flex items-center">
+            <button
+              :disabled="currentCardIndex >= shuffledCards.length - 1"
+              class="h-full px-5 disabled:opacity-50 cursor-pointer disabled:cursor-not-allowed"
+              @click="nextCard"
+            >
+              <UIcon name="i-material-symbols-chevron-right" size="30" />
+            </button>
           </div>
         </div>
 
-        <div class="flex justify-center items-center mt-4 gap-4">
+        <div class="flex justify-center mt-4">
           <UButton
             color="neutral"
             variant="ghost"
-            icon="i-material-symbols-chevron-left"
-            :disabled="currentCardIndex === 0"
-            @click="prevCard"
-          />
-          <span class="text-sm opacity-70">
-            {{ currentCardIndex + 1 }} / {{ shuffledCards.length }}
-          </span>
-          <UButton
-            color="neutral"
-            variant="ghost"
-            icon="i-material-symbols-chevron-right"
-            :disabled="currentCardIndex >= shuffledCards.length - 1"
-            @click="nextCard"
-          />
+            size="sm"
+            icon="i-material-symbols-refresh"
+            @click="resetAndShuffle"
+          >
+            처음부터
+          </UButton>
         </div>
       </div>
     </div>
@@ -113,6 +136,37 @@ const { data, pending, error } = await useFetch(
 );
 
 const flashcard = computed(() => data.value?.flashcard);
+
+function* prng(init: number) {
+  let x = Math.floor(init * 2147483647) || 1;
+  while (true) {
+    x = (x * 16807) % 2147483647;
+    yield x / 2147483647;
+  }
+}
+
+const seed = useState<number>(`flashcard-seed-${flashcardId}`, () =>
+  Math.random()
+);
+
+function shuffleWithSeed<T>(list: T[], s: number): T[] {
+  const out = [...list];
+  const rand = prng(s);
+  for (let i = out.length - 1; i > 0; i--) {
+    const j = Math.floor(rand.next().value! * (i + 1));
+    [out[i], out[j]] = [out[j], out[i]];
+  }
+  return out;
+}
+
+const shuffledCards = ref<{ front: string; back: string }[]>([]);
+
+function shuffleCards() {
+  if (!flashcard.value) return;
+  shuffledCards.value = shuffleWithSeed(flashcard.value.cards, seed.value);
+}
+
+shuffleCards();
 
 // SEO
 useSeoMeta({
@@ -138,11 +192,6 @@ const canDelete = computed(() => {
     flashcard.value &&
     user.value.id === flashcard.value.author?.id
   );
-});
-
-const shuffledCards = computed(() => {
-  if (!flashcard.value?.cards) return [];
-  return [...flashcard.value.cards];
 });
 
 const currentCard = computed(() => {
@@ -238,6 +287,15 @@ async function toggleBookmark() {
     });
   } finally {
     waitingForBookmark.value = false;
+  }
+}
+
+function resetAndShuffle() {
+  if (flashcard.value?.cards) {
+    seed.value = Math.random(); // 새 시드
+    shuffleCards();
+    currentCardIndex.value = 0;
+    showFront.value = true;
   }
 }
 </script>

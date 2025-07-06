@@ -12,6 +12,7 @@
     "maxlength",
     "nontick",
     "Nuxt",
+    "prng",
     "Virtuals"
   ]
 }

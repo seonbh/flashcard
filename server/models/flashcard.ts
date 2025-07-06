@@ -68,6 +68,7 @@ const FlashcardSchema = new mongoose.Schema<IFlashcard, IFlashcardModel>(
     cards: {
       type: [
         {
+          _id: false,
           front: {
             type: String,
             required: true,
