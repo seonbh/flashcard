@@ -1,7 +1,6 @@
 import mongoose from "mongoose";
 
 let isConnecting = false;
-let isConnected = false;
 
 export default defineNitroPlugin(async () => {
   if (mongoose.connection.readyState !== 0) {
@@ -10,7 +9,13 @@ export default defineNitroPlugin(async () => {
 
   const runtimeConfig = useRuntimeConfig();
 
-  if (isConnected || isConnecting) {
+  if (isConnecting) {
+    const interval = setInterval(() => {
+      if (mongoose.connection.readyState !== 0) {
+        clearInterval(interval);
+        console.log("MongoDB connection established");
+      }
+    }, 1000);
     return;
   }
 
@@ -19,7 +24,6 @@ export default defineNitroPlugin(async () => {
     isConnecting = true;
     await mongoose.connect(mongoUri);
     isConnecting = false;
-    isConnected = true;
     console.log("Connected to MongoDB");
   } catch (error) {
     console.error("MongoDB connection error:", error);

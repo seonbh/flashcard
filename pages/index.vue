@@ -4,7 +4,7 @@
     <div class="flex justify-between items-center mb-5 gap-3">
       <UInput
         v-model="searchQuery"
-        placeholder="플래시카드 제목 검색..."
+        placeholder="플래시카드 검색..."
         size="lg"
         class="flex-1 max-w-xs"
         type="search"
