@@ -1,7 +1,7 @@
 <template>
   <div class="max-w-4xl mx-auto px-4 py-8">
     <!-- 헤더 -->
-    <div class="flex justify-between items-center mb-8 gap-4">
+    <div class="flex justify-between items-center mb-5 gap-3">
       <UInput
         v-model="searchQuery"
         placeholder="플래시카드 제목 검색..."
@@ -10,12 +10,12 @@
         @keyup.enter="refresh"
       />
       <UButton size="lg" :to="user ? '/new' : '/auth/signup'" variant="soft">
-        새 플래시카드 만들기
+        플래시카드 만들기
       </UButton>
     </div>
 
     <!-- 플래시카드 리스트 -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-2">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
       <NuxtLink
         v-for="flashcard in data?.flashcards"
         :key="flashcard._id"

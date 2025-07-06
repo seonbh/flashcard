@@ -23,7 +23,7 @@
     <!-- 내가 만든 플래시카드 -->
     <div class="mb-8">
       <h2 class="text-xl font-semibold mb-4">내가 만든 플래시카드</h2>
-      <div v-if="data?.createdFlashcards?.length" class="grid gap-4">
+      <div v-if="data?.createdFlashcards?.length" class="grid gap-3">
         <div
           v-for="flashcard in data.createdFlashcards"
           :key="flashcard._id"
@@ -62,7 +62,7 @@
     <!-- 내가 북마크한 플래시카드 -->
     <div>
       <h2 class="text-xl font-semibold mb-4">내가 북마크한 플래시카드</h2>
-      <div v-if="data?.bookmarkedFlashcards?.length" class="grid gap-4">
+      <div v-if="data?.bookmarkedFlashcards?.length" class="grid gap-3">
         <div
           v-for="flashcard in data.bookmarkedFlashcards"
           :key="flashcard._id"
