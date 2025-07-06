@@ -15,7 +15,8 @@ export default defineEventHandler(async (event) => {
   let flashcard;
   try {
     flashcard = await Flashcard.getWithAuthor(id);
-  } catch {
+  } catch (err) {
+    console.error("Error fetching flashcard:", err);
     throw createError({
       statusCode: 500,
       message: "플래시카드 조회 중 오류가 발생했습니다.",
