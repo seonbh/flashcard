@@ -10,12 +10,6 @@ export default defineNitroPlugin(async () => {
   const runtimeConfig = useRuntimeConfig();
 
   if (isConnecting) {
-    const interval = setInterval(() => {
-      if (mongoose.connection.readyState !== 0) {
-        clearInterval(interval);
-        console.log("MongoDB connection established");
-      }
-    }, 1000);
     return;
   }
 
