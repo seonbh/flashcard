@@ -7,6 +7,7 @@
         placeholder="플래시카드 제목 검색..."
         size="lg"
         class="flex-1 max-w-xs"
+        type="search"
         @keyup.enter="refresh"
       />
       <UButton size="lg" :to="user ? '/new' : '/auth/signup'" variant="soft">
@@ -42,6 +43,11 @@
             <span>by {{ flashcard.author?.name ?? "알 수 없는 사용자" }}</span>
             &middot;
             <div class="flex items-center gap-1">
+              <UIcon name="i-heroicons-rectangle-stack" class="w-3 h-3" />
+              <span>{{ flashcard.cardCount ?? 0 }}</span>
+            </div>
+            &middot;
+            <div class="flex items-center gap-1">
               <UIcon
                 :name="
                   flashcard.isBookmarked
@@ -52,11 +58,6 @@
                 :class="flashcard.isBookmarked ? 'text-primary' : ''"
               />
               <span>{{ flashcard.bookmarkCount ?? 0 }}</span>
-            </div>
-            &middot;
-            <div class="flex items-center gap-1">
-              <UIcon name="i-heroicons-rectangle-stack" class="w-3 h-3" />
-              <span>{{ flashcard.cardCount ?? 0 }}</span>
             </div>
           </div>
         </div>
@@ -87,11 +88,10 @@ useSeoMeta({
 const { user } = useUserSession();
 
 const searchQuery = ref("");
+const debouncedQuery = refDebounced(searchQuery, 400);
 
 const { data, pending, refresh } = await useFetch("/api/flashcards", {
   key: "flashcard-list",
-  query: {
-    search: searchQuery,
-  },
+  query: { search: debouncedQuery },
 });
 </script>

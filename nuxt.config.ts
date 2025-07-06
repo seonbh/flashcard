@@ -11,6 +11,7 @@ export default defineNuxtConfig({
     "@nuxt/icon",
     "@nuxt/ui",
     "nuxt-auth-utils",
+    "@vueuse/nuxt",
   ],
   runtimeConfig: {
     mongodbUri: process.env.NUXT_MONGODB_URI,

@@ -167,17 +167,20 @@ FlashcardSchema.statics.findRecentWithAuthor = async function (
   return results;
 };
 
-// 제목으로 검색
+// 제목과 카드 내용으로 검색
 FlashcardSchema.statics.searchByTitleWithAuthor = async function (
   query: string,
   userId?: string
 ) {
-  const searchQuery = this.find(
-    { $text: { $search: query } },
-    { score: { $meta: "textScore" } }
-  )
+  const searchQuery = this.find({
+    $or: [
+      { title: { $regex: query, $options: "i" } },
+      { "cards.front": { $regex: query, $options: "i" } },
+      { "cards.back": { $regex: query, $options: "i" } }
+    ]
+  })
     .populate("author")
-    .sort({ score: { $meta: "textScore" }, bookmarkCount: -1, createdAt: -1 });
+    .sort({ bookmarkCount: -1, createdAt: -1 });
 
   if (userId) {
     searchQuery.populate({
@@ -252,7 +255,6 @@ FlashcardSchema.virtual("bookmarks", {
   foreignField: "flashcard",
 });
 
-FlashcardSchema.index({ title: "text" });
 
 // 6. 모델 생성 및 내보내기
 const FlashcardModel =
