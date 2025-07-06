@@ -51,7 +51,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## Style
 
 - 다크, 라이트 모드는 시스템 테마로만. 따로 색지정 ㄴㄴ
-- 좌우간격 4, 모바일, 플래시카드판은 0 (px-0 sm:px-4)
+- 좌우간격 4, 모바일, 플래시카드판은 0 (px-4)
 - 화면 크기는 max-w-4xl
 - 그림자 사용 금지
 - primary, negative, error 이 외의 색 금지

@@ -1,7 +1,7 @@
 <template>
-  <div class="max-w-4xl mx-auto px-0 sm:px-4 py-8">
+  <div class="max-w-4xl mx-auto px-4 py-8">
     <!-- 헤더 -->
-    <div class="flex justify-between items-center mb-8 gap-4 px-4 sm:px-0">
+    <div class="flex justify-between items-center mb-8 gap-4">
       <UInput
         v-model="searchQuery"
         placeholder="플래시카드 제목 검색..."
@@ -42,9 +42,13 @@
             <span>by {{ flashcard.author?.name ?? "알 수 없는 사용자" }}</span>
             &middot;
             <div class="flex items-center gap-1">
-              <UIcon 
-                :name="flashcard.isBookmarked ? 'i-heroicons-bookmark-solid' : 'i-heroicons-bookmark'" 
-                class="w-3 h-3" 
+              <UIcon
+                :name="
+                  flashcard.isBookmarked
+                    ? 'i-heroicons-bookmark-solid'
+                    : 'i-heroicons-bookmark'
+                "
+                class="w-3 h-3"
                 :class="flashcard.isBookmarked ? 'text-primary' : ''"
               />
               <span>{{ flashcard.bookmarkCount ?? 0 }}</span>

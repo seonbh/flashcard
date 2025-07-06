@@ -8,7 +8,7 @@
       @submit="onSubmit"
     >
       <!-- 기본 정보 -->
-      <div class="space-y-4 px-0 sm:px-4">
+      <div class="space-y-4 px-4">
         <UFormField label="플래시카드 제목" name="title" required>
           <UInput
             v-model="formState.title"
@@ -18,19 +18,10 @@
             maxlength="20"
           />
         </UFormField>
-
       </div>
 
       <!-- 카드 목록 -->
-      <UFormField
-        label="카드 목록"
-        name="cards"
-        required
-        class="px-0 sm:px-4"
-        :ui="{
-          label: 'px-4 sm:px-0',
-        }"
-      >
+      <UFormField label="카드 목록" name="cards" required class="px-4">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <UCard v-for="(card, index) in formState.cards" :key="index">
             <div class="space-y-3">
@@ -74,7 +65,7 @@
       </UFormField>
 
       <!-- 제출 버튼 -->
-      <div class="flex justify-end space-x-4 px-0 sm:px-4">
+      <div class="flex justify-end space-x-4 px-4">
         <UButton variant="ghost" to="/" :disabled="pending">취소</UButton>
         <UButton type="submit" :loading="pending" :disabled="pending">
           플래시카드 만들기

@@ -21,7 +21,7 @@
 
     <div v-else>
       <!-- 헤더 -->
-      <div class="px-0 sm:px-4 mb-8">
+      <div class="px-4 mb-8">
         <h1 class="text-xl font-bold mb-2">{{ flashcard.title }}</h1>
         <div class="flex items-center gap-2 text-sm opacity-70">
           <span>by {{ flashcard.author?.name ?? "알 수 없는 사용자" }}</span>
@@ -65,7 +65,7 @@
       <!-- 플래시카드 -->
       <div
         v-if="flashcard"
-        class="flex-1 w-full flex flex-col items-center justify-center px-0 sm:px-4"
+        class="flex-1 w-full flex flex-col items-center justify-center px-4"
       >
         <div
           class="w-full max-w-2xl aspect-[3/2] bg-white dark:bg-black rounded-xl p-8 flex items-center justify-center cursor-pointer border-1 border-gray-300/70 dark:border-gray-600/70"
