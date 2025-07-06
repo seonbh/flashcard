@@ -1,4 +1,4 @@
-import { createFlashcardSchema } from "~/shared/schemas";
+import { flashcardSchema } from "~/shared/schemas";
 import Flashcard from "~/server/models/flashcard";
 import RateLimit from "~/server/models/rateLimit";
 import User from "~/server/models/user";
@@ -17,7 +17,7 @@ export default defineEventHandler(async (event) => {
   let validatedData;
   try {
     const body = await readBody(event);
-    validatedData = createFlashcardSchema.parse(body);
+    validatedData = flashcardSchema.parse(body);
   } catch (error) {
     if (
       error &&

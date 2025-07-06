@@ -1,56 +1,25 @@
 <template>
   <div class="max-w-4xl mx-auto py-8">
     <UForm
-      :schema="createFlashcardSchema"
+      :schema="flashcardSchema"
       :state="formState"
       class="space-y-8"
       :validate-on="[]"
       @submit="onSubmit"
     >
-      <!-- 기본 정보 -->
-      <div class="space-y-4 px-4">
-        <UFormField label="플래시카드 제목" name="title" required>
-          <UInput
-            v-model="formState.title"
-            placeholder="플래시카드 제목을 입력하세요"
-            :disabled="pending"
-            class="w-full"
-            maxlength="20"
-          />
-        </UFormField>
-      </div>
+      <FlashcardTitle v-model="formState.title" :disabled="pending" />
 
       <!-- 카드 목록 -->
       <UFormField label="카드 목록" name="cards" required class="px-4">
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          <UCard v-for="(card, index) in formState.cards" :key="index">
-            <div class="space-y-3">
-              <UInput
-                v-model="card.front"
-                class="w-full"
-                placeholder="카드 앞면 내용"
-                :disabled="pending"
-                maxlength="50"
-              />
-              <UTextarea
-                v-model="card.back"
-                class="w-full"
-                placeholder="카드 뒷면 내용"
-                :disabled="pending"
-                :rows="2"
-                autoresize
-                maxlength="100"
-              />
-              <UButton
-                block
-                color="neutral"
-                label="삭제"
-                variant="outline"
-                :disabled="pending || formState.cards.length <= 1"
-                @click="removeCard(index)"
-              />
-            </div>
-          </UCard>
+          <FlashcardCard
+            v-for="(card, index) in formState.cards"
+            :key="index"
+            v-model="formState.cards[index]"
+            :disabled="pending"
+            :can-delete="formState.cards.length > 1"
+            @remove="removeCard(index)"
+          />
           <UCard class="flex items-center justify-center">
             <UButton
               block
@@ -76,7 +45,7 @@
 </template>
 
 <script setup lang="ts">
-import { createFlashcardSchema } from "~/shared/schemas";
+import { flashcardSchema } from "~/shared/schemas";
 
 definePageMeta({
   middleware: "auth",

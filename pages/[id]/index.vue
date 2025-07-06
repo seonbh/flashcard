@@ -29,6 +29,13 @@
           <span>{{ toRelTime(flashcard.createdAt) }}</span>
           <template v-if="canDelete">
             &middot;
+            <NuxtLink
+              :to="`/${flashcardId}/edit`"
+              class="cursor-pointer underline"
+            >
+              수정
+            </NuxtLink>
+            &middot;
             <button
               class="cursor-pointer underline disabled:cursor-not-allowed"
               :disabled="deleting"

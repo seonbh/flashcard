@@ -1,6 +1,6 @@
 import { z } from "zod";
 
-export const createFlashcardSchema = z.object({
+export const flashcardSchema = z.object({
   title: z
     .string()
     .trim()
