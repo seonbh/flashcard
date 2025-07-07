@@ -1,5 +1,4 @@
-import mongoose from "mongoose";
-import type { Model, Document, Types } from "mongoose";
+import mongoose, { type Types, type Document, type Model } from "mongoose";
 import bcrypt from "bcrypt";
 
 const SALT_ROUNDS = 10;

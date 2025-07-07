@@ -32,9 +32,7 @@ export default defineEventHandler(async (event) => {
       firstCardFront: flashcard.cards[0].front,
       cardCount: flashcard.cards?.length ?? 0,
       author: flashcard.author
-        ? {
-            name: (flashcard.author as IUser).name,
-          }
+        ? { name: (flashcard.author as IUser).name }
         : null,
       bookmarkCount: flashcard.bookmarkCount,
       createdAt: flashcard.createdAt,

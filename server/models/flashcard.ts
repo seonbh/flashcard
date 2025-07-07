@@ -1,5 +1,4 @@
-import mongoose, { Types } from "mongoose";
-import type { Document, Model } from "mongoose";
+import mongoose, { Types, type Document, type Model } from "mongoose";
 import type { IUser } from "~/server/models/user";
 import type { IBookmark } from "~/server/models/bookmark";
 
