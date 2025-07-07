@@ -1,6 +1,4 @@
-import Flashcard from "~/server/models/flashcard";
-import Bookmark from "~/server/models/bookmark";
-import User from "~/server/models/user";
+import { Flashcard, Bookmark, User } from "~/server/models";
 
 export default defineEventHandler(async (event) => {
   // 로그인 확인

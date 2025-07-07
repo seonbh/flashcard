@@ -55,8 +55,4 @@ RateLimitSchema.statics.setRateLimit = async function (
   await this.findOneAndUpdate({ key }, { key, expiresAt }, { upsert: true });
 };
 
-const RateLimitModel =
-  (mongoose.models.RateLimit as IRateLimitModel) ??
-  mongoose.model<IRateLimit, IRateLimitModel>("RateLimit", RateLimitSchema);
-
-export default RateLimitModel;
+export default RateLimitSchema;

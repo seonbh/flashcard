@@ -1,6 +1,4 @@
-import User from "~/server/models/user";
-import Flashcard from "~/server/models/flashcard";
-import Bookmark from "~/server/models/bookmark";
+import { Flashcard, Bookmark, User } from "~/server/models";
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);

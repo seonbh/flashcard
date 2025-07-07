@@ -1,7 +1,5 @@
 import { flashcardSchema } from "~/shared/schemas";
-import Flashcard from "~/server/models/flashcard";
-import RateLimit from "~/server/models/rateLimit";
-import User from "~/server/models/user";
+import { Flashcard, RateLimit, User } from "~/server/models";
 
 export default defineEventHandler(async (event) => {
   // 로그인 확인

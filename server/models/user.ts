@@ -170,8 +170,4 @@ UserSchema.virtual("isBanned").get(function (this: IUser) {
   return !!this.banDate && this.banDate > new Date();
 });
 
-const UserModel =
-  (mongoose.models.User as IUserModel) ??
-  mongoose.model<IUser, IUserModel>("User", UserSchema);
-
-export default UserModel;
+export default UserSchema;

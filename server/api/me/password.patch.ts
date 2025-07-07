@@ -1,5 +1,6 @@
 import { z } from "zod";
-import User, { NoUserError, WrongPassword } from "~/server/models/user";
+import { NoUserError, WrongPassword } from "~/server/models/user";
+import { User } from "~/server/models";
 
 const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "현재 비밀번호를 입력해주세요."),

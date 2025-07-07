@@ -1,5 +1,6 @@
-import Flashcard, { type IFlashcard } from "~/server/models/flashcard";
-import Bookmark, { type IBookmark } from "~/server/models/bookmark";
+import type { IFlashcard } from "~/server/models/flashcard";
+import type { IBookmark } from "~/server/models/bookmark";
+import { Flashcard, Bookmark } from "~/server/models";
 
 export default defineEventHandler(async (event) => {
   const session = await getUserSession(event);

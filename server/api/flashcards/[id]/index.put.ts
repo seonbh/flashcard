@@ -1,5 +1,4 @@
-import Flashcard from "~/server/models/flashcard";
-import User from "~/server/models/user";
+import { Flashcard, User } from "~/server/models";
 import { flashcardSchema } from "~/shared/schemas";
 
 export default defineEventHandler(async (event) => {

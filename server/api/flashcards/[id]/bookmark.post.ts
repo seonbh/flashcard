@@ -1,6 +1,5 @@
-import Bookmark from "~/server/models/bookmark";
-import Flashcard, { type IFlashcard } from "~/server/models/flashcard";
-import User from "~/server/models/user";
+import type { IFlashcard } from "~/server/models/flashcard";
+import { Bookmark, Flashcard, User } from "~/server/models";
 import mongoose from "mongoose";
 
 export default defineEventHandler(async (event) => {

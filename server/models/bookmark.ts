@@ -133,9 +133,4 @@ BookmarkSchema.statics.removeByFlashcard = async function (
   return result.deletedCount;
 };
 
-// 6. 모델 생성 및 내보내기
-const BookmarkModel =
-  (mongoose.models.Bookmark as IBookmarkModel) ||
-  mongoose.model<IBookmark, IBookmarkModel>("Bookmark", BookmarkSchema);
-
-export default BookmarkModel;
+export default BookmarkSchema;

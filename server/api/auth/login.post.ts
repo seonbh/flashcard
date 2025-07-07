@@ -1,6 +1,5 @@
 import { z } from "zod";
-import User from "~/server/models/user";
-import RateLimit from "~/server/models/rateLimit";
+import { User, RateLimit } from "~/server/models";
 
 const loginSchema = z.object({
   name: z.string().min(1, "이름을 입력해주세요."),

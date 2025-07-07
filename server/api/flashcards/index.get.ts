@@ -1,5 +1,5 @@
-import Flashcard from "~/server/models/flashcard";
 import type { IUser } from "~/server/models/user";
+import { Flashcard } from "~/server/models";
 
 export default defineEventHandler(async (event) => {
   const { user } = await getUserSession(event);

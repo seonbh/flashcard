@@ -1,6 +1,6 @@
 import { z } from "zod";
-import User, { NameDuplicateError } from "~/server/models/user";
-import RateLimit from "~/server/models/rateLimit";
+import { NameDuplicateError } from "~/server/models/user";
+import { User, RateLimit } from "~/server/models";
 
 // 금지된 아이디 목록
 const FORBIDDEN_IDS = [

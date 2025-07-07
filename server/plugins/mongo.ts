@@ -1,26 +1,52 @@
-import mongoose from "mongoose";
+import mongoose, { type Mongoose } from "mongoose";
 
-let isConnecting = false;
+let cached = global.mongoose;
 
-export default defineNitroPlugin(async () => {
-  if (mongoose.connection.readyState !== 0) {
-    return;
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
+}
+
+async function connectToDb(): Promise<Mongoose> {
+  if (cached.conn) {
+    console.log("Using cached MongoDB connection.");
+    return cached.conn;
   }
 
-  const runtimeConfig = useRuntimeConfig();
+  if (!cached.promise) {
+    const runtimeConfig = useRuntimeConfig();
+    const mongoUri = runtimeConfig.mongodbUri;
 
-  if (isConnecting) {
-    return;
+    if (!mongoUri) {
+      throw new Error("MongoDB URI is not defined in runtime config.");
+    }
+
+    console.log("Creating new MongoDB connection.");
+    cached.promise = mongoose
+      .connect(mongoUri, {
+        bufferCommands: false,
+      })
+      .then((mongooseInstance) => {
+        return mongooseInstance;
+      });
   }
 
   try {
-    const mongoUri = runtimeConfig.mongodbUri;
-    isConnecting = true;
-    await mongoose.connect(mongoUri);
-    isConnecting = false;
-    console.log("Connected to MongoDB");
+    cached.conn = await cached.promise;
+  } catch (e) {
+    cached.promise = null;
+    throw e;
+  }
+
+  return cached.conn;
+}
+
+export default defineNitroPlugin(async () => {
+  try {
+    await connectToDb();
+    console.log("MongoDB connection initialized via Nitro plugin.");
   } catch (error) {
-    console.error("MongoDB connection error:", error);
+    console.error("MongoDB connection failed in Nitro plugin:", error);
+
     throw error;
   }
 });
