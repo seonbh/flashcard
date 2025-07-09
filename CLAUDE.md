@@ -20,7 +20,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
    - `/auth/signup` 가입 (ID, Password로만)
    - `/auth/login` 로그인, 로그아웃
-   - `/auth/me` 패스워드 변경, 내가 만든 플래시카드, 내가 북마크한 플래시카드 목록, 탈퇴
+   - `/me` 패스워드 변경, 내가 만든 플래시카드, 내가 북마크한 플래시카드 목록, 탈퇴
 
 2. `/` `/?search="ADHD"` 플래시카드 목록, 검색
 
