@@ -27,7 +27,7 @@
           <span>by {{ flashcard.author?.name ?? "알 수 없는 사용자" }}</span>
           &middot;
           <span>{{ toRelTime(flashcard.createdAt) }}</span>
-          <template v-if="canDelete">
+          <template v-if="canManage">
             &middot;
             <NuxtLink
               :to="`/${flashcardId}/edit`"
@@ -210,7 +210,7 @@ const reverseMode = ref(false);
 const { user } = useUserSession();
 const toast = useToast();
 
-const canDelete = computed(() => {
+const canManage = computed(() => {
   return (
     user.value &&
     flashcard.value &&

@@ -1,5 +1,8 @@
 import mongoose, { type Mongoose } from "mongoose";
 
+const MAX_RETRIES = 3;
+const RETRY_DELAY_MS = 1_000;
+
 let cached = global.mongoose;
 
 if (!cached) {
@@ -43,15 +46,10 @@ async function connectToDb(): Promise<Mongoose> {
   return cached.conn;
 }
 
-export default defineNitroPlugin(async () => {
-  const MAX_RETRIES = 3;
-  const RETRY_DELAY_MS = 1_000;
-
+export default defineEventHandler(async () => {
   for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
     try {
       await connectToDb();
-      console.log(`✅ MongoDB connection successful on attempt ${attempt}.`);
-      // 연결에 성공하면 즉시 함수를 종료합니다.
       return;
     } catch (error) {
       console.error(
@@ -60,7 +58,7 @@ export default defineNitroPlugin(async () => {
 
       if (attempt === MAX_RETRIES) {
         console.error(
-          "All MongoDB connection attempts failed. Server will not start correctly.",
+          "🆘 All MongoDB connection attempts failed. Server will not start correctly.",
           error
         );
         throw error;
