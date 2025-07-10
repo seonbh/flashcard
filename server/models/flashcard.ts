@@ -41,8 +41,24 @@ export interface IFlashcardModel extends Model<IFlashcard> {
     id: string | Types.ObjectId
   ): Promise<(IFlashcard & { author: IUser | null }) | null>;
 
-  deleteByIdAndAuthor(id: string, author: string): Promise<boolean>;
-  nullifyAuthor(author: string): Promise<number>;
+  incrementBookmarkCount(
+    id: string | Types.ObjectId,
+    option?: { session?: mongoose.ClientSession }
+  ): Promise<IFlashcard | null>;
+  decrementBookmarkCount(
+    id: string | Types.ObjectId,
+    option?: { session?: mongoose.ClientSession }
+  ): Promise<IFlashcard | null>;
+
+  deleteByIdAndAuthor(
+    id: string,
+    author: string,
+    option?: { session?: mongoose.ClientSession }
+  ): Promise<boolean>;
+  nullifyAuthor(
+    author: string,
+    option?: { session?: mongoose.ClientSession }
+  ): Promise<number>;
 }
 
 // 3. 스키마(Schema) 정의
@@ -208,12 +224,13 @@ FlashcardSchema.statics.searchByTitleWithAuthor = async function (
 // 플래시카드 삭제 (작성자 확인 포함)
 FlashcardSchema.statics.deleteByIdAndAuthor = async function (
   id: string,
-  author: string
+  author: string,
+  option?: { session?: mongoose.ClientSession }
 ): Promise<boolean> {
-  const result = await this.deleteOne({
-    _id: new Types.ObjectId(id),
-    author: new Types.ObjectId(author),
-  });
+  const result = await this.deleteOne(
+    { _id: new Types.ObjectId(id), author: new Types.ObjectId(author) },
+    option
+  );
   return result.deletedCount > 0;
 };
 
@@ -226,13 +243,41 @@ FlashcardSchema.statics.getWithAuthor = async function (
   return flashcard as IFlashcard & { author: IUser | null };
 };
 
+// 북마크 수 증가
+FlashcardSchema.statics.incrementBookmarkCount = async function (
+  id: string | Types.ObjectId,
+  option?: { session?: mongoose.ClientSession }
+): Promise<IFlashcard | null> {
+  const flashcard = await this.findByIdAndUpdate(
+    id,
+    { $inc: { bookmarkCount: 1 } },
+    { new: true, session: option?.session }
+  );
+  return flashcard;
+};
+
+// 북마크 수 감소
+FlashcardSchema.statics.decrementBookmarkCount = async function (
+  id: string | Types.ObjectId,
+  option?: { session?: mongoose.ClientSession }
+): Promise<IFlashcard | null> {
+  const flashcard = await this.findByIdAndUpdate(
+    id,
+    { $inc: { bookmarkCount: -1 } },
+    { new: true, session: option?.session }
+  );
+  return flashcard;
+};
+
 // 사용자의 모든 플래시카드 작성자를 null로 변경
 FlashcardSchema.statics.nullifyAuthor = async function (
-  author: string
+  author: string,
+  option?: { session?: mongoose.ClientSession }
 ): Promise<number> {
   const result = await this.updateMany(
     { author: new Types.ObjectId(author) },
-    { $set: { author: null } }
+    { $set: { author: null } },
+    option
   );
   return result.modifiedCount;
 };

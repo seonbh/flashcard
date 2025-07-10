@@ -1,45 +1,38 @@
+import mongoose from "mongoose";
 import { Flashcard, Bookmark, User } from "~/server/models";
 
 export default defineEventHandler(async (event) => {
-  const session = await getUserSession(event);
+  const { user } = await getUserSession(event);
 
-  if (!session.user) {
+  if (!user) {
     throw createError({
       statusCode: 401,
       message: "로그인이 필요합니다.",
     });
   }
 
-  const userId = session.user.id;
+  const session = await mongoose.startSession();
 
   try {
-    await Flashcard.nullifyAuthor(userId); // 사용자가 만든 모든 플래시카드
-    await Bookmark.nullifyUser(userId); // 사용자의 모든 북마크
+    session.startTransaction();
+    const deleted = await User.withdrawal(user.id, { session });
+    if (!deleted) {
+      throw new Error("계정 삭제에 실패했습니다.");
+    }
+    await Flashcard.nullifyAuthor(user.id, { session });
+    await Bookmark.nullifyUser(user.id, { session });
+    await session.commitTransaction();
   } catch (error) {
+    await session.abortTransaction();
     console.error("탈퇴 처리 중 오류:", error);
     throw createError({
       statusCode: 500,
       message: "탈퇴 처리 중 오류가 발생했습니다.",
     });
-  }
-  let deletedUser;
-  try {
-    deletedUser = await User.findByIdAndDelete(userId);
-  } catch (error) {
-    console.error("계정 삭제 중 오류:", error);
-    throw createError({
-      statusCode: 500,
-      message: "계정 삭제 중 오류가 발생했습니다.",
-    });
-  }
-  if (!deletedUser) {
-    throw createError({
-      statusCode: 500,
-      message: "계정 삭제에 실패했습니다.",
-    });
+  } finally {
+    await session.endSession();
   }
 
-  // 4. 세션 종료
   await clearUserSession(event);
 
   return {

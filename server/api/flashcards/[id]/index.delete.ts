@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { Flashcard, Bookmark, User } from "~/server/models";
 
 export default defineEventHandler(async (event) => {
@@ -35,25 +36,25 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  let deleted;
+  const session = await mongoose.startSession();
   try {
-    deleted = await Flashcard.deleteByIdAndAuthor(id, user.id);
-    if (deleted) {
-      // 관련된 북마크들도 삭제
-      await Bookmark.removeByFlashcard(id);
+    const deleted = await Flashcard.deleteByIdAndAuthor(id, user.id, {
+      session,
+    });
+    if (!deleted) {
+      throw new Error("플래시카드를 찾을 수 없거나 작성자가 아닙니다.");
     }
+    // 관련된 북마크들도 삭제
+    await Bookmark.removeByFlashcard(id, { session });
+    await session.commitTransaction();
   } catch {
+    await session.abortTransaction();
     throw createError({
       statusCode: 500,
       message: "플래시카드 삭제 중 오류가 발생했습니다.",
     });
-  }
-
-  if (!deleted) {
-    throw createError({
-      statusCode: 404,
-      message: "플래시카드를 찾을 수 없거나 삭제 권한이 없습니다.",
-    });
+  } finally {
+    await session.endSession();
   }
 
   return {

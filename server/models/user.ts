@@ -29,6 +29,10 @@ export interface IUserModel extends Model<IUser> {
     oldPassword: string,
     newPassword: string
   ): Promise<void>;
+  withdrawal(
+    id: Types.ObjectId | string,
+    option?: { session?: mongoose.ClientSession }
+  ): Promise<boolean>;
 }
 
 const UserSchema = new mongoose.Schema<IUser, IUserModel>(
@@ -162,6 +166,14 @@ UserSchema.statics.changePassword = async function (
   }
   user.password = await bcrypt.hash(newPassword, SALT_ROUNDS);
   await user.save();
+};
+
+UserSchema.statics.withdrawal = async function (
+  id: Types.ObjectId | string,
+  option?: { session?: mongoose.ClientSession }
+): Promise<boolean> {
+  const result = await this.deleteOne({ _id: id }, option);
+  return result.deletedCount > 0;
 };
 
 // Virtuals

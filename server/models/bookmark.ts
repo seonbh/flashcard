@@ -17,23 +17,32 @@ export interface IBookmark extends Document {
 export interface IBookmarkModel extends Model<IBookmark> {
   add(
     userId: Types.ObjectId | string,
-    flashcardId: Types.ObjectId | string
+    flashcardId: Types.ObjectId | string,
+    option?: { session?: mongoose.ClientSession }
   ): Promise<IBookmark>;
 
   remove(
     userId: Types.ObjectId | string,
-    flashcardId: Types.ObjectId | string
+    flashcardId: Types.ObjectId | string,
+    option?: { session?: mongoose.ClientSession }
   ): Promise<boolean>;
 
   bookmarked(
     userId: Types.ObjectId | string,
-    flashcardId: Types.ObjectId | string
+    flashcardId: Types.ObjectId | string,
+    option?: { session?: mongoose.ClientSession }
   ): Promise<boolean>;
 
   findByUser(userId: Types.ObjectId | string): Promise<IBookmark[]>;
 
-  nullifyUser(userId: Types.ObjectId | string): Promise<number>;
-  removeByFlashcard(flashcardId: Types.ObjectId | string): Promise<number>;
+  nullifyUser(
+    userId: Types.ObjectId | string,
+    option?: { session?: mongoose.ClientSession }
+  ): Promise<number>;
+  removeByFlashcard(
+    flashcardId: Types.ObjectId | string,
+    option?: { session?: mongoose.ClientSession }
+  ): Promise<number>;
 }
 
 // 3. 스키마(Schema) 정의
@@ -68,37 +77,47 @@ BookmarkSchema.index({ user: 1, flashcard: 1 });
 // 북마크 추가
 BookmarkSchema.statics.add = async function (
   userId: Types.ObjectId | string,
-  flashcardId: Types.ObjectId | string
+  flashcardId: Types.ObjectId | string,
+  option?: { session?: mongoose.ClientSession }
 ): Promise<IBookmark> {
   const bookmark = new this({
     user: new Types.ObjectId(userId),
     flashcard: new Types.ObjectId(flashcardId),
   });
-  await bookmark.save();
+  await bookmark.save(option);
   return bookmark;
 };
 
 // 북마크 제거
 BookmarkSchema.statics.remove = async function (
   userId: Types.ObjectId | string,
-  flashcardId: Types.ObjectId | string
+  flashcardId: Types.ObjectId | string,
+  option?: { session?: mongoose.ClientSession }
 ): Promise<boolean> {
-  const result = await this.deleteOne({
-    user: new Types.ObjectId(userId),
-    flashcard: new Types.ObjectId(flashcardId),
-  });
+  const result = await this.deleteOne(
+    {
+      user: new Types.ObjectId(userId),
+      flashcard: new Types.ObjectId(flashcardId),
+    },
+    option
+  );
   return result.deletedCount > 0;
 };
 
 // 북마크 존재 여부 확인
 BookmarkSchema.statics.bookmarked = async function (
   userId: Types.ObjectId | string,
-  flashcardId: Types.ObjectId | string
+  flashcardId: Types.ObjectId | string,
+  option?: { session?: mongoose.ClientSession }
 ): Promise<boolean> {
-  const bookmark = await this.exists({
+  const query = this.exists({
     user: new Types.ObjectId(userId),
     flashcard: new Types.ObjectId(flashcardId),
   });
+  if (option?.session) {
+    query.session(option.session);
+  }
+  const bookmark = await query;
   return !!bookmark;
 };
 
@@ -113,22 +132,26 @@ BookmarkSchema.statics.findByUser = async function (
 
 // 사용자의 모든 북마크에서 사용자를 null로 변경
 BookmarkSchema.statics.nullifyUser = async function (
-  userId: Types.ObjectId | string
+  userId: Types.ObjectId | string,
+  option?: { session?: mongoose.ClientSession }
 ): Promise<number> {
   const result = await this.updateMany(
     { user: new Types.ObjectId(userId) },
-    { $set: { user: null } }
+    { $set: { user: null } },
+    option
   );
   return result.modifiedCount;
 };
 
 // 플래시카드의 모든 북마크 제거
 BookmarkSchema.statics.removeByFlashcard = async function (
-  flashcardId: Types.ObjectId | string
+  flashcardId: Types.ObjectId | string,
+  option?: { session?: mongoose.ClientSession }
 ): Promise<number> {
-  const result = await this.deleteMany({
-    flashcard: new Types.ObjectId(flashcardId),
-  });
+  const result = await this.deleteMany(
+    { flashcard: new Types.ObjectId(flashcardId) },
+    option
+  );
   return result.deletedCount;
 };
 

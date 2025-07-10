@@ -49,10 +49,7 @@ export default defineEventHandler(async (event) => {
   try {
     updateRes = await Flashcard.updateOne(
       { _id: id, author: user.id },
-      {
-        title: body.data.title,
-        cards: body.data.cards,
-      }
+      { title: body.data.title, cards: body.data.cards }
     );
   } catch {
     throw createError({

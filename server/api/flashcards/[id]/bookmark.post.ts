@@ -58,35 +58,31 @@ export default defineEventHandler(async (event) => {
   let isBookmarked = false;
   let updatedFlashcard: IFlashcard | null;
   try {
-    await session.withTransaction(async () => {
-      const bookmarked = await Bookmark.bookmarked(user.id, id);
+    session.startTransaction();
+    isBookmarked = await Bookmark.bookmarked(user.id, id, { session });
 
-      if (bookmarked) {
-        // 북마크 해제
-        await Bookmark.remove(user.id, id);
-        updatedFlashcard = await Flashcard.findByIdAndUpdate(
-          id,
-          { $inc: { bookmarkCount: -1 } },
-          { new: true }
-        );
-        isBookmarked = false;
-      } else {
-        // 북마크 추가
-        await Bookmark.add(user.id, id);
-        updatedFlashcard = await Flashcard.findByIdAndUpdate(
-          id,
-          { $inc: { bookmarkCount: 1 } },
-          { new: true }
-        );
-        isBookmarked = true;
-      }
-    });
+    if (isBookmarked) {
+      // 북마크 해제
+      await Bookmark.remove(user.id, id, { session });
+      updatedFlashcard = await Flashcard.decrementBookmarkCount(id, {
+        session,
+      });
+      isBookmarked = false;
+    } else {
+      // 북마크 추가
+      await Bookmark.add(user.id, id, { session });
+      updatedFlashcard = await Flashcard.incrementBookmarkCount(id, {
+        session,
+      });
+      isBookmarked = true;
+    }
 
     if (!updatedFlashcard!) {
       throw new Error();
     }
+    await session.commitTransaction();
   } catch {
-    session.abortTransaction();
+    await session.abortTransaction();
     throw createError({
       statusCode: 500,
       message: "북마크 처리 중 오류가 발생했습니다.",
