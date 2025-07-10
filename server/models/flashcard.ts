@@ -33,7 +33,6 @@ export interface IFlashcardModel extends Model<IFlashcard> {
   findRecentWithAuthor(
     userId?: string
   ): Promise<(IFlashcard & { isBookmarked?: boolean })[]>;
-  findByIds(ids: (string | Types.ObjectId)[]): Promise<IFlashcard[]>;
   searchByTitleWithAuthor(
     query: string,
     userId?: string
@@ -216,16 +215,6 @@ FlashcardSchema.statics.deleteByIdAndAuthor = async function (
     author: new Types.ObjectId(author),
   });
   return result.deletedCount > 0;
-};
-
-// ID 배열로 플래시카드 목록 찾기
-FlashcardSchema.statics.findByIds = async function (
-  ids: (string | Types.ObjectId)[]
-): Promise<IFlashcard[]> {
-  if (ids.length === 0) return [];
-  return await this.find({
-    _id: { $in: ids.map((id) => new Types.ObjectId(id)) },
-  });
 };
 
 // 작성자 정보 포함하여 플래시카드 조회

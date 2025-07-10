@@ -37,9 +37,9 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  let flashcard;
+  let flashcardExists;
   try {
-    flashcard = await Flashcard.findById(id);
+    flashcardExists = await Flashcard.exists({ _id: id });
   } catch {
     throw createError({
       statusCode: 500,
@@ -47,7 +47,7 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  if (!flashcard) {
+  if (!flashcardExists) {
     throw createError({
       statusCode: 404,
       message: "플래시카드를 찾을 수 없습니다.",

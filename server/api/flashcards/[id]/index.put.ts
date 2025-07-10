@@ -2,7 +2,6 @@ import { Flashcard, User } from "~/server/models";
 import { flashcardSchema } from "~/shared/schemas";
 
 export default defineEventHandler(async (event) => {
-  // 로그인 확인
   const { user } = await getUserSession(event);
   if (!user) {
     throw createError({
@@ -19,18 +18,15 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  let body;
-  try {
-    body = await readBody(event);
-  } catch {
+  const body = await readValidatedBody(event, (body) =>
+    flashcardSchema.safeParse(body)
+  );
+  if (!body.success) {
     throw createError({
       statusCode: 400,
       message: "잘못된 요청 데이터입니다.",
     });
   }
-
-  // 스키마 검증
-  const validatedData = flashcardSchema.parse(body);
 
   let existingUser;
   try {
@@ -49,41 +45,15 @@ export default defineEventHandler(async (event) => {
     });
   }
 
-  let flashcard;
+  let updateRes;
   try {
-    flashcard = await Flashcard.findById(id);
-  } catch {
-    throw createError({
-      statusCode: 500,
-      message: "플래시카드 조회 중 오류가 발생했습니다.",
-    });
-  }
-
-  if (!flashcard) {
-    throw createError({
-      statusCode: 404,
-      message: "플래시카드를 찾을 수 없습니다.",
-    });
-  }
-
-  // 작성자 확인
-  if (flashcard.author?.toString() !== user.id) {
-    throw createError({
-      statusCode: 403,
-      message: "수정 권한이 없습니다.",
-    });
-  }
-
-  let updatedFlashcard;
-  try {
-    updatedFlashcard = await Flashcard.findByIdAndUpdate(
-      id,
+    updateRes = await Flashcard.updateOne(
+      { _id: id, author: user.id },
       {
-        title: validatedData.title,
-        cards: validatedData.cards,
-      },
-      { new: true }
-    ).populate("author");
+        title: body.data.title,
+        cards: body.data.cards,
+      }
+    );
   } catch {
     throw createError({
       statusCode: 500,
@@ -91,9 +61,15 @@ export default defineEventHandler(async (event) => {
     });
   }
 
+  if (updateRes.modifiedCount < 1) {
+    throw createError({
+      statusCode: 404,
+      message: "플래시카드를 찾을 수 없거나 수정할 권한이 없습니다.",
+    });
+  }
+
   return {
     success: true,
     message: "플래시카드가 성공적으로 수정되었습니다.",
-    flashcard: updatedFlashcard,
   };
 });
