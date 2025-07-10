@@ -38,6 +38,7 @@ export default defineEventHandler(async (event) => {
 
   const session = await mongoose.startSession();
   try {
+    session.startTransaction();
     const deleted = await Flashcard.deleteByIdAndAuthor(id, user.id, {
       session,
     });
