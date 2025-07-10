@@ -170,11 +170,13 @@ FlashcardSchema.statics.searchByTitleWithAuthor = async function (
   query: string,
   userId?: string
 ) {
+  const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+
   const searchQuery = this.find({
     $or: [
-      { title: { $regex: query, $options: "i" } },
-      { "cards.front": { $regex: query, $options: "i" } },
-      { "cards.back": { $regex: query, $options: "i" } },
+      { title: { $regex: escapedQuery, $options: "i" } },
+      { "cards.front": { $regex: escapedQuery, $options: "i" } },
+      { "cards.back": { $regex: escapedQuery, $options: "i" } },
     ],
   })
     .populate("author")

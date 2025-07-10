@@ -14,7 +14,7 @@
         @submit="onSubmit"
       >
         <div class="space-y-4">
-          <UFormField label="아이디 & 닉네임" name="id" required>
+          <UFormField label="아이디 & 닉네임" name="name" required>
             <UInput
               v-model="formState.name"
               placeholder="영문, 숫자, 한글 2-10자"
