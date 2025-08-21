@@ -1,70 +1,44 @@
 import mongoose, { type Mongoose } from "mongoose";
 
-const MAX_RETRIES = 3;
-const RETRY_DELAY_MS = 1_000;
-
-let cached = global.mongoose;
-
-if (!cached) {
-  cached = global.mongoose = { conn: null, promise: null };
+declare global {
+  var __mongoCache:
+    | { conn: Mongoose | null; promise: Promise<Mongoose> | null }
+    | undefined;
+}
+if (!global.__mongoCache) {
+  global.__mongoCache = { conn: null, promise: null };
 }
 
-async function connectToDb(): Promise<Mongoose> {
-  if (cached.conn) {
-    console.log("Using cached MongoDB connection.");
-    return cached.conn;
-  }
+function connectOnce(): Promise<Mongoose> {
+  if (global.__mongoCache!.conn)
+    return Promise.resolve(global.__mongoCache!.conn);
 
-  if (!cached.promise) {
-    const runtimeConfig = useRuntimeConfig();
-    const mongoUri = runtimeConfig.mongodbUri;
-
-    if (!mongoUri) {
-      throw new Error("MongoDB URI is not defined in runtime config.");
-    }
-
-    console.log("Creating new MongoDB connection.");
-    cached.promise = mongoose
-      .connect(mongoUri, {
+  if (!global.__mongoCache!.promise) {
+    global.__mongoCache!.promise = mongoose
+      .connect(useRuntimeConfig().mongodbUri, {
         bufferCommands: false,
-        serverSelectionTimeoutMS: 10_000,
-        socketTimeoutMS: 10_000,
         maxPoolSize: 5,
+        serverSelectionTimeoutMS: 5_000,
+        socketTimeoutMS: 30_000,
       })
-      .then((mongooseInstance) => {
-        return mongooseInstance;
+      .then((m) => (global.__mongoCache!.conn = m))
+      .catch((e) => {
+        global.__mongoCache!.promise = null;
+        throw e;
       });
   }
-
-  try {
-    cached.conn = await cached.promise;
-  } catch (e) {
-    cached.promise = null;
-    throw e;
-  }
-
-  return cached.conn;
+  return global.__mongoCache!.promise;
 }
 
 export default defineEventHandler(async () => {
-  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
-    try {
-      await connectToDb();
-      return;
-    } catch (error) {
-      console.error(
-        `MongoDB connection attempt ${attempt} of ${MAX_RETRIES} failed.`
-      );
+  if (mongoose.connection.readyState === 1) return;
 
-      if (attempt === MAX_RETRIES) {
-        console.error(
-          "🆘 All MongoDB connection attempts failed. Server will not start correctly.",
-          error
-        );
-        throw error;
-      }
-
-      await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-    }
+  try {
+    await connectOnce();
+  } catch {
+    throw createError({
+      statusCode: 503,
+      statusMessage: "Service Unavailable",
+    });
   }
 });
