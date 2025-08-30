@@ -5,7 +5,7 @@
         <div class="flex justify-between items-center h-16">
           <!-- 왼쪽: 로고 -->
           <div class="flex items-center">
-            <NuxtLink to="/" class="text-xl font-bold">플래시카드.</NuxtLink>
+            <NuxtLink to="/" class="text-xl font-bold">플래시카드ㅎㅎㅎㅎ.</NuxtLink>
           </div>
 
           <!-- 오른쪽: 사용자 메뉴 -->
